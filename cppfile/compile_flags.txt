@@ -1,0 +1,8 @@
+-DLOCAL
+-O2
+-Wall
+-g
+-fno-exceptions
+-ffreestanding
+-fno-rtti
+-std=c++17

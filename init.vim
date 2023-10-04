@@ -1,4 +1,4 @@
-call plug#begin('$HOME/.vim/plugged')
+call plug#begin('$HOME/.config/nvim/plugged')
 Plug 'mg979/vim-visual-multi'
 Plug 'tpope/vim-surround'
 Plug 'jiangmiao/auto-pairs'
@@ -14,13 +14,14 @@ Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'rhysd/vim-clang-format'
 call plug#end()
 
 "==== for appearence
-silent! color catppuccin_latte
+silent! color catppuccin_macchiato
 let g:VM_theme             = 'iceblue'
 let g:airline_theme        = 'angr'
-hi Normal ctermfg=252 ctermbg=none
+hi Normal ctermbg=none
 
 "==== for lsp
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
@@ -44,7 +45,6 @@ function! s:on_lsp_buffer_enabled() abort
     nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
 
     let g:lsp_format_sync_timeout = 1000
-    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
 endfunction
 
 augroup lsp_install
@@ -52,7 +52,8 @@ augroup lsp_install
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
 
-""==== for cpp-lsp
+"==== for cpp-lsp
+let g:lsp_diagnostics_enabled = 0
 if executable('clangd')
     au User lsp_setup call lsp#register_server({
         \ 'name': 'clangd',
@@ -60,6 +61,20 @@ if executable('clangd')
         \ 'whitelist': ['cpp'],
         \ })
 endif
+
+
+"==== for clang-format
+let g:clang_format#code_style = "google"
+let g:clang_format#style_options = {
+            \ "AccessModifierOffset" : -4,
+            \ "AllowShortIfStatementsOnASingleLine" : "true",
+            \ "Standard" : "c++17"}
+let g:clang_format#auto_format_on_insert_leave = 0
+au FileType c,cpp ClangFormatAutoEnable
+au FileType c,cpp nnoremap <buffer><Leader>f :<C-u>ClangFormat<CR>
+au FileType c,cpp vnoremap <buffer><Leader>f :ClangFormat<CR>
+" temporarily disable auto format
+nmap <Leader>F :ClangFormatAutoToggle<CR>
 
 "==== move line up/down
 nnoremap <C-j> :m .+1<CR>==
@@ -82,6 +97,8 @@ noremap <RIGHT> :vertical resize+5<CR>
 
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 au TextChanged,TextChangedI <buffer> if &readonly == 0 && filereadable(bufname('%')) | silent write | endif
+au TermOpen term://* startinsert
+au BufNewFile *.cpp exec ":0r ~/.config/nvim/cppfile/code.cpp"
 
 set autochdir
 set backspace=indent,eol,start
@@ -93,6 +110,10 @@ set number relativenumber
 set scrolloff=4
 set wrap mouse=a
 
+set fileencodings=utf-8,gb2312,gbk,gb18030
+set termencoding=utf-8
+set encoding=utf-8
+
 silent !mkdir -p $HOME/.vim/tmp/backup
 silent !mkdir -p $HOME/.vim/tmp/undo
 set backupdir=$HOME/.vim/tmp/backup,.
@@ -103,6 +124,7 @@ noremap ; :
 
 "==== speacial for Windows (CRLF)
 map <LEADER>Y :w !clip.exe<CR><CR>
+vmap <LEADER>Y :'<,'>w !clip.exe<CR><CR>
 
 func! SearchPlaceHolder()
     call search("<++>", 'w')
@@ -114,7 +136,9 @@ map <LEADER>m mko<++><ESC>`k:delmarks k<CR>
 noremap r :call CompileRunGcc()<CR>
 func! CompileRunGcc()
     exec "w"
-    exec "!g++ % -std=c++23 -Ofast -g -Wall -Wextra -o %< && ./%< && rm -f ./%<"
+    set splitbelow
+    :sp
+    term g++ % -std=c++2a -O2 -g -Wall -fsanitize=undefined -o %< && ./%< && rm -f ./%<
 endfunc
 
 noremap <LEADER><CR> :nohlsearch<CR>
