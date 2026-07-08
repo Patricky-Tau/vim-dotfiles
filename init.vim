@@ -10,17 +10,25 @@ Plug 'karb94/neoscroll.nvim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/vim-easy-align'
+
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'rhysd/vim-clang-format'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+
+Plug 'sphamba/smear-cursor.nvim'
 call plug#end()
 
 "==== for appearence
 silent! color catppuccin_macchiato
 let g:VM_theme             = 'iceblue'
 let g:airline_theme        = 'angr'
+set termguicolors
 hi Normal ctermbg=none
 
 "==== for lsp
@@ -97,7 +105,6 @@ noremap <RIGHT> :vertical resize+5<CR>
 
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 au TextChanged,TextChangedI <buffer> if &readonly == 0 && filereadable(bufname('%')) | silent write | endif
-au TermOpen term://* startinsert
 au BufNewFile *.cpp exec ":0r ~/.config/nvim/cppfile/code.cpp"
 
 set autochdir
@@ -160,3 +167,34 @@ let g:NERDTrimTrailingWhitespace = 1
 highlight LineHighlight ctermbg=gray guibg=black
 nnoremap <silent> <LEADER>x :call matchadd('LineHighlight', '\%'.line('.').'l')<CR>
 nnoremap <silent> <LEADER>X :call clearmatches()<CR>
+
+"==== fzf config
+map <LEADER>f <ESC>:FZF<CR>
+
+
+" Customize fzf colors to match your color scheme
+" - fzf#wrap translates this to a set of `--color` options
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'query':   ['fg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
+" Enable per-command history
+" - History files will be stored in the specified directory
+" - When set, CTRL-N and CTRL-P will be bound to 'next-history' and
+"   'previous-history' instead of 'down' and 'up'.
+let g:fzf_history_dir = '~/.local/share/fzf-history'
+
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
